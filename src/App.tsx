@@ -68,7 +68,7 @@ function App() {
         </form>
 
         {users.length !== 0 && !loading && !error && (
-          <p className="mb-4 text-left">Showing users for: "{"test"}"</p>
+          <p className="mb-4 text-left">Showing users for: "{param.query}"</p>
         )}
 
         {!loading && error && (
