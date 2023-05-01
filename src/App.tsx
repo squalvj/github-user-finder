@@ -19,6 +19,10 @@ function App() {
   const getUsersFn = async () => {
     setLoading(true);
     setError(false);
+    setParam((prev) => ({
+      ...prev,
+      page: 1,
+    }));
     try {
       const users = await getUsers({ ...param, page: 1 });
       setUsers(users);
@@ -86,7 +90,7 @@ function App() {
             !loading &&
             !error &&
             users.map((user) => (
-              <div className="mt-4">
+              <div className="mb-4">
                 <UserCard username={user.username} />
               </div>
             ))}
