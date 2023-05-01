@@ -6,12 +6,13 @@ import UserCard from "./components/UserCard";
 import { getUsers, UsersType } from "./modules/User";
 import Spinner from "./components/Spinner";
 import ErrorComponent from "./components/ErrorComponent";
+import ScrollTrigger from "./components/ScrollTrigger";
 
 function App() {
   const [param, setParam] = useState({
     page: 1,
     query: "",
-    per_page: 10,
+    per_page: 20,
   });
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<UsersType[]>([]);
@@ -22,8 +23,10 @@ function App() {
   const getUsersFn = async () => {
     setLoading(true);
     setError(false);
+    setUsers([]);
     setParam((prev) => ({
       ...prev,
+      query: queryText,
       page: 1,
     }));
     try {
@@ -32,7 +35,7 @@ function App() {
       setParam((prev) => ({
         ...prev,
         query: queryText,
-        page: prev.page++,
+        page: prev.page + 1,
       }));
       setDidSearch(true);
     } catch (_) {
@@ -49,7 +52,27 @@ function App() {
       setUsers(users);
       setParam((prev) => ({
         ...prev,
-        page: prev.page++,
+        page: prev.page + 1,
+      }));
+      setDidSearch(true);
+    } catch (_) {
+      setError(true);
+    }
+    setLoading(false);
+  };
+
+  const paginateUsers = async () => {
+    if (loading || error) return;
+
+    setLoading(true);
+    setError(false);
+    try {
+      const users = await getUsers({ ...param, page: param.page });
+      setUsers((prev) => [...prev, ...users]);
+      setParam((prev) => ({
+        ...prev,
+        query: queryText,
+        page: prev.page + 1,
       }));
       setDidSearch(true);
     } catch (_) {
@@ -64,7 +87,7 @@ function App() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (!queryText) return
+            if (!queryText) return;
             getUsersFn();
           }}
         >
@@ -86,19 +109,18 @@ function App() {
           <p className="mt-4">No Results.</p>
         )}
 
-        {!loading && error && <ErrorComponent onClick={refetchUsers} />}
-
-        <div className="overflow-y-auto min-h-[calc(100vh-200px)] max-h-[calc(100vh-200px)] sm:min-h-[500px] sm:max-h-[500px]">
-          {loading && <Spinner />}
+        <ScrollTrigger onTrigger={paginateUsers}>
           {users.length !== 0 &&
-            !loading &&
-            !error &&
             users.map((user) => (
               <div className="mb-4">
                 <UserCard username={user.username} />
               </div>
             ))}
-        </div>
+
+          {loading && <Spinner />}
+
+          {!loading && error && <ErrorComponent onClick={refetchUsers} />}
+        </ScrollTrigger>
       </div>
     </div>
   );
