@@ -5,6 +5,7 @@ import Button from "./components/Button";
 import UserCard from "./components/UserCard";
 import { getUsers, UsersType } from "./modules/User";
 import Spinner from "./components/Spinner";
+import ErrorComponent from "./components/ErrorComponent";
 
 function App() {
   const [param, setParam] = useState({
@@ -53,7 +54,7 @@ function App() {
   };
 
   return (
-    <div className="App bg-gray-100 flex items-center min-h-screen p-4">
+    <div className="App bg-gray-100 flex items-center min-h-screen p-4 overflow-hidden">
       <div className="bg-white container">
         <form
           onSubmit={(e) => {
@@ -75,16 +76,9 @@ function App() {
           <p className="mb-4 text-left">Showing users for: "{param.query}"</p>
         )}
 
-        {!loading && error && (
-          <>
-            <p className="text-red-500">Oops something went wrong</p>
-            <span onClick={refetchUsers} className="cursor-pointer underline">
-              Click here to try again
-            </span>
-          </>
-        )}
+        {!loading && error && <ErrorComponent onClick={refetchUsers} />}
 
-        <div className="overflow-y-auto min-h-[500px]">
+        <div className="overflow-y-auto min-h-[calc(100vh-200px)] max-h-[calc(100vh-200px)] sm:min-h-[500px] sm:max-h-[500px]">
           {loading && <Spinner />}
           {users.length !== 0 &&
             !loading &&

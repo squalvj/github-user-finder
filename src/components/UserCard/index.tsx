@@ -1,6 +1,8 @@
 import { useState } from "react";
 import Spinner from "../Spinner";
 import RepoCard from "../RepoCard";
+import { getReposByUsername, Repo } from "../../modules/Repos";
+import ErrorComponent from "../ErrorComponent";
 
 const Chevron = () => (
   <svg
@@ -24,10 +26,41 @@ type Props = {
 const UserCard: React.FC<Props> = ({ username }) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [repos, setRepos] = useState<Repo[]>([]);
+  const [error, setError] = useState(false);
+  const [didSearch, setDidSearch] = useState(false);
 
-  const handleClick = () => {
+  const handleClick = async () => {
     setOpen((prev) => !prev);
+    if (repos.length !== 0) return;
+
     setLoading(true);
+    setError(false);
+
+    try {
+      const reposData = await getReposByUsername(username);
+      setDidSearch(true);
+      setRepos(reposData);
+    } catch (_) {
+      setError(true);
+    }
+
+    setLoading(false);
+  };
+
+  const handleRefetch = async () => {
+    setLoading(true);
+    setError(false);
+
+    try {
+      const reposData = await getReposByUsername(username);
+      setDidSearch(true);
+      setRepos(reposData);
+    } catch (_) {
+      setError(true);
+    }
+
+    setLoading(false);
   };
 
   const ulClass = [
@@ -48,31 +81,30 @@ const UserCard: React.FC<Props> = ({ username }) => {
         </span>
       </div>
       <ul className={ulClass.join(" ")}>
-        
         {loading && open && (
           <div className="my-4">
             <Spinner />
           </div>
         )}
 
+        {!error && didSearch && repos.length === 0 && (
+          <p className="mt-4">No Results.</p>
+        )}
+
+        {error && !loading && <ErrorComponent onClick={handleRefetch} />}
+
         {!loading && open && (
           <li className="pl-4">
-            <div className="mt-3">
-              <RepoCard
-                description="This is description"
-                title="This is Title"
-                totalStar={12}
-                key={0}
-              />
-            </div>
-            <div className="mt-3">
-              <RepoCard
-                description="This is description"
-                title="This is Title"
-                totalStar={12}
-                key={0}
-              />
-            </div>
+            {repos.map((repo, i) => (
+              <div className="mt-3">
+                <RepoCard
+                  description={repo.description}
+                  title={repo.name}
+                  totalStar={repo.stargazers_count}
+                  key={i}
+                />
+              </div>
+            ))}
           </li>
         )}
       </ul>

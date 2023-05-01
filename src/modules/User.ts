@@ -3,11 +3,6 @@ type UsersPayload = {
   login: string;
 };
 
-type Repo = {
-  name: string;
-  stargazers_count: number;
-};
-
 export type UsersType = {
   username: string;
 };
