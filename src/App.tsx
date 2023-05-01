@@ -16,6 +16,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<UsersType[]>([]);
   const [error, setError] = useState(false);
+  const [queryText, setQueryText] = useState("");
+  const [didSearch, setDidSearch] = useState(false);
 
   const getUsersFn = async () => {
     setLoading(true);
@@ -25,12 +27,14 @@ function App() {
       page: 1,
     }));
     try {
-      const users = await getUsers({ ...param, page: 1 });
+      const users = await getUsers({ ...param, query: queryText, page: 1 });
       setUsers(users);
       setParam((prev) => ({
         ...prev,
+        query: queryText,
         page: prev.page++,
       }));
+      setDidSearch(true);
     } catch (_) {
       setError(true);
     }
@@ -47,6 +51,7 @@ function App() {
         ...prev,
         page: prev.page++,
       }));
+      setDidSearch(true);
     } catch (_) {
       setError(true);
     }
@@ -59,13 +64,14 @@ function App() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            if (!queryText) return
             getUsersFn();
           }}
         >
           <TextInput
-            value={param.query}
+            value={queryText}
             placeholder="Enter username"
-            onChange={(e) => setParam((prev) => ({ ...prev, query: e }))}
+            onChange={(e) => setQueryText(e)}
           />
           <div className="my-4">
             <Button type="submit">Search</Button>
@@ -74,6 +80,10 @@ function App() {
 
         {users.length !== 0 && !loading && !error && (
           <p className="mb-4 text-left">Showing users for: "{param.query}"</p>
+        )}
+
+        {!loading && !error && didSearch && users.length === 0 && (
+          <p className="mt-4">No Results.</p>
         )}
 
         {!loading && error && <ErrorComponent onClick={refetchUsers} />}
