@@ -2,12 +2,12 @@ import { ReactNode } from "react";
 import Spinner from "../Spinner";
 
 enum BUTTON_VARIANT {
-  PRIMARY = 'primary',
-  SECONDARY = 'secondary'
+  PRIMARY = "primary",
+  SECONDARY = "secondary",
 }
 
 enum BUTTON_SIZE {
-  FULL = 'full'
+  FULL = "full",
 }
 
 type ButtonProps = {
@@ -15,8 +15,9 @@ type ButtonProps = {
   variant?: BUTTON_VARIANT;
   onClick?: () => void;
   disabled?: boolean;
-  size?: 'full';
+  size?: "full";
   loading?: boolean;
+  type?: "button" | "submit" | "reset" | undefined;
 };
 
 const BACKGROUND_MAP = {
@@ -35,18 +36,21 @@ const Button = ({
   disabled,
   size = BUTTON_SIZE.FULL,
   loading,
+  type = "button",
 }: ButtonProps) => {
   const backgroundClass = BACKGROUND_MAP[variant];
   const sizeClass = SIZE_MAP[size];
-  const disabledClass = disabled ? "bg-gray-200 text-black cursor-not-allowed" : ""
+  const disabledClass = disabled
+    ? "bg-gray-200 text-black cursor-not-allowed"
+    : "";
   return (
     <button
       onClick={() => {
         if (loading) return;
 
-        if (onClick)
-          onClick();
+        if (onClick) onClick();
       }}
+      type={type}
       disabled={disabled}
       className={`${backgroundClass} ${sizeClass} ${disabledClass} p-3`}
     >

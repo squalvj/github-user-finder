@@ -32,28 +32,64 @@ function App() {
     setLoading(false);
   };
 
+  const refetchUsers = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const users = await getUsers(param);
+      setUsers(users);
+      setParam((prev) => ({
+        ...prev,
+        page: prev.page++,
+      }));
+    } catch (_) {
+      setError(true);
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="App bg-gray-100 flex items-center min-h-screen p-4">
       <div className="bg-white container">
-        <TextInput
-          value={param.query}
-          placeholder="Enter username"
-          onChange={(e) => setParam((prev) => ({ ...prev, query: e }))}
-        />
-        <div className="my-4">
-          <Button onClick={getUsersFn}>Search</Button>
-        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            getUsersFn();
+          }}
+        >
+          <TextInput
+            value={param.query}
+            placeholder="Enter username"
+            onChange={(e) => setParam((prev) => ({ ...prev, query: e }))}
+          />
+          <div className="my-4">
+            <Button type="submit">Search</Button>
+          </div>
+        </form>
 
         {users.length !== 0 && !loading && !error && (
           <p className="mb-4 text-left">Showing users for: "{"test"}"</p>
         )}
 
-        <div>
+        {!loading && error && (
+          <>
+            <p className="text-red-500">Oops something went wrong</p>
+            <span onClick={refetchUsers} className="cursor-pointer underline">
+              Click here to try again
+            </span>
+          </>
+        )}
+
+        <div className="overflow-y-auto min-h-[500px]">
           {loading && <Spinner />}
           {users.length !== 0 &&
             !loading &&
             !error &&
-            users.map((user) => <UserCard username={user.username} />)}
+            users.map((user) => (
+              <div className="mt-4">
+                <UserCard username={user.username} />
+              </div>
+            ))}
         </div>
       </div>
     </div>
