@@ -5,7 +5,7 @@ Simple app for searching github user and their repository built in purely react
 
 # Installation
 ## Clone the repository
-Run npm install to install the dependencies
+Run "npm install" to install the dependencies
 Run npm start to start the project
 ## Usage
 1. type username
