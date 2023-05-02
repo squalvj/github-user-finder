@@ -13,6 +13,11 @@ type queryUsers = {
   per_page: number;
 };
 
+export type UsersApi = {
+  total_count: number;
+  items: UsersType[]
+}
+
 export function transformUser(users: UsersPayload[]): UsersType[] {
   return users
     .filter((user) => user.type === "User")
@@ -25,7 +30,7 @@ export async function getUsers({
   query,
   page,
   per_page,
-}: queryUsers): Promise<UsersType[]> {
+}: queryUsers): Promise<UsersApi> {
   const params = new URLSearchParams({
     q: query,
     page: page.toString(),
@@ -33,6 +38,9 @@ export async function getUsers({
   });
   const response = await fetch(`https://api.github.com/search/users?${params}`);
   const data = await response.json();
-  const users = transformUser(data.items);
-  return users;
+  const items = transformUser(data.items);
+  return {
+    total_count: data.total_count,
+    items
+  }
 }

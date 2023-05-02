@@ -3,10 +3,15 @@ import { useState } from "react";
 import TextInput from "./components/TextField";
 import Button from "./components/Button";
 import UserCard from "./components/UserCard";
-import { getUsers, UsersType } from "./modules/User";
+import { getUsers, UsersApi } from "./modules/User";
 import Spinner from "./components/Spinner";
 import ErrorComponent from "./components/ErrorComponent";
 import ScrollTrigger from "./components/ScrollTrigger";
+
+const DEFAULT_USERS = {
+  total_count: 0,
+  items: []
+}
 
 function App() {
   const [param, setParam] = useState({
@@ -15,15 +20,15 @@ function App() {
     per_page: 20,
   });
   const [loading, setLoading] = useState(false);
-  const [users, setUsers] = useState<UsersType[]>([]);
+  const [users, setUsers] = useState<UsersApi>(DEFAULT_USERS);
+  const [hasNext, setHasNext] = useState(true);
   const [error, setError] = useState(false);
   const [queryText, setQueryText] = useState("");
-  const [didSearch, setDidSearch] = useState(false);
 
   const getUsersFn = async () => {
     setLoading(true);
     setError(false);
-    setUsers([]);
+    setUsers(DEFAULT_USERS);
     setParam((prev) => ({
       ...prev,
       query: queryText,
@@ -37,7 +42,7 @@ function App() {
         query: queryText,
         page: prev.page + 1,
       }));
-      setDidSearch(true);
+      setHasNext(true)
     } catch (_) {
       setError(true);
     }
@@ -54,7 +59,7 @@ function App() {
         ...prev,
         page: prev.page + 1,
       }));
-      setDidSearch(true);
+      setHasNext(true)
     } catch (_) {
       setError(true);
     }
@@ -62,19 +67,25 @@ function App() {
   };
 
   const paginateUsers = async () => {
-    if (loading || error) return;
+    if (loading || error || !hasNext) return;
 
     setLoading(true);
     setError(false);
     try {
       const users = await getUsers({ ...param, page: param.page });
-      setUsers((prev) => [...prev, ...users]);
+      setUsers((prev) => ({
+        total_count: users.total_count,
+        items: [...prev.items, ...users.items]
+      }));
       setParam((prev) => ({
         ...prev,
         query: queryText,
         page: prev.page + 1,
       }));
-      setDidSearch(true);
+
+      if (users.items.length === 0)
+        setHasNext(false)
+
     } catch (_) {
       setError(true);
     }
@@ -101,17 +112,17 @@ function App() {
           </div>
         </form>
 
-        {users.length !== 0 && !loading && !error && (
+        {users.items.length !== 0 && !loading && !error && !!param.query &&  (
           <p className="mb-4 text-left">Showing users for: "{param.query}"</p>
         )}
 
-        {!loading && !error && didSearch && users.length === 0 && (
+        {!loading && !error && users.items.length === 0 && !!param.query &&(
           <p className="mt-4">No Results.</p>
         )}
 
         <ScrollTrigger onTrigger={paginateUsers}>
-          {users.length !== 0 &&
-            users.map((user) => (
+          {users.items.length !== 0 &&
+            users.items.map((user) => (
               <div className="mb-4">
                 <UserCard username={user.username} />
               </div>
