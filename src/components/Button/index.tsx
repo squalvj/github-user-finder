@@ -2,8 +2,8 @@ import { ReactNode } from "react";
 import Spinner from "../Spinner";
 
 enum BUTTON_VARIANT {
-  PRIMARY = "primary",
-  SECONDARY = "secondary",
+  PRIMARY = "PRIMARY",
+  SECONDARY = "SECONDARY",
 }
 
 enum BUTTON_SIZE {
@@ -12,7 +12,7 @@ enum BUTTON_SIZE {
 
 type ButtonProps = {
   children: ReactNode;
-  variant?: BUTTON_VARIANT;
+  variant?: keyof typeof BUTTON_VARIANT;
   onClick?: () => void;
   disabled?: boolean;
   size?: "full";
@@ -21,8 +21,8 @@ type ButtonProps = {
 };
 
 const BACKGROUND_MAP = {
-  [BUTTON_VARIANT.PRIMARY]: `bg-blue-400 text-white`,
-  [BUTTON_VARIANT.SECONDARY]: `bg-yellow-400 color-white`,
+  [BUTTON_VARIANT.PRIMARY]: `bg-blue-400 text-white primary`,
+  [BUTTON_VARIANT.SECONDARY]: `bg-yellow-400 color-white secondary`,
 };
 
 const SIZE_MAP = {
@@ -31,7 +31,7 @@ const SIZE_MAP = {
 
 const Button = ({
   children,
-  variant = BUTTON_VARIANT.PRIMARY,
+  variant = "PRIMARY",
   onClick,
   disabled,
   size = BUTTON_SIZE.FULL,
